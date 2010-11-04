@@ -15,7 +15,7 @@ cachesim : $(OBJS)
 cxxcache.o : cxxcache.cxx
 	g++ -c cxxcache.cxx
 
-main.o : main.cxx input.cxx cache.h
+main.o : main.cxx input.cxx cxxcache.h
 	g++ -c main.cxx
 
 input.o : input.cxx main.cxx
