@@ -11,6 +11,7 @@
 using namespace std;
 
 #include "cxxcache.h"
+#include "cacheline.h"
 
 
 // ***TO DO*** need to create a dynamically allocated array of cache entries
@@ -19,20 +20,34 @@ using namespace std;
 
 L1_cache::L1_cache()
 {
+   // specified parameters
    blockSize = 32;
    cacheSize = 8192;
    assoc = 1;
    tHit = 1;
    tMiss = 1;
 
-   // need dynamic array here
+   // calculated parameters
+   numLines = cacheSize / blockSize;
+   wordsPerLine = blockSize / 16; 
+
+   // create dynamic array
+   lines = new cacheLine[numLines];
 }
 
 L1_cache::~L1_cache()
 {
    // free dynamic array
+   delete [] lines;
 }
 
+cacheLine * L1_cache::hit(unsigned address)
+{
+   // go through the cache and see if the data is there
+   //for (unsigned i = 0; i < numLines; i++)
+      //if (get_entry(i).get_tag()
+   return 0;
+}
 
 
 L2_cache::L2_cache()

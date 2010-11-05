@@ -7,19 +7,22 @@
 # 11/1/2010	created	Danny Gale
 #
 
-OBJS = main.o input.o cxxcache.o
+OBJS = main.o input.o cxxcache.o cacheline.o
 
 cachesim : $(OBJS)
-	g++ -o cachesim $(OBJS)
+	g++ -Wall -o cachesim $(OBJS)
 
-cxxcache.o : cxxcache.cxx
-	g++ -c cxxcache.cxx
+cxxcache.o : cxxcache.cxx cacheline.h
+	g++ -Wall -c cxxcache.cxx
+
+cacheline.o : cacheline.cxx cacheline.h
+	g++ -Wall -c cacheline.cxx
 
 main.o : main.cxx input.cxx cxxcache.h
-	g++ -c main.cxx
+	g++ -Wall -c main.cxx
 
 input.o : input.cxx main.cxx
-	g++ -c input.cxx
+	g++ -Wall -c input.cxx
 
 clean :
 	rm $(OBJS)

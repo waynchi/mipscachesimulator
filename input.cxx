@@ -37,8 +37,6 @@ void get_config(string filename)
    unsigned int value;
    ifstream configFile (filename.c_str());
 
-
-
    // check for valid configuration file
    if (!configFile.is_open())
    {

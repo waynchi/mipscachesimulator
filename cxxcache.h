@@ -1,13 +1,20 @@
-// cache.h
+// cxxcache.h
 // holds classes for the L1 and L2 caches, and main memory
 // ECEN4593 cache simulator project
 // F2010
 // Danny Gale, Chris Messick
 //
 // Revision History:
-// 11/2/2010   created	Danny Gale
-// 11/2/2010   converted from C structs to C++ classes	 Danny Gale
+// 11/2/2010   Danny Gale  created    
+// 11/2/2010   Danny Gale  converted from C structs to C++ classes
+// 11/4/2010   Danny Gale  added dynamic cacheLine array to L1 and L2 caches
+//			   added some numLines and wordsPerLine, calculated from given params
 //
+#ifndef _CXXCACHE_H_
+#define _CXXCACHE_H_
+
+using namespace std;
+#include "cacheline.h"
 
 class L1_cache
 {
@@ -32,14 +39,19 @@ class L1_cache
       void set_tHit(unsigned newtHit) { tHit = newtHit; }
       void set_tMiss(unsigned newtMiss) {tMiss = newtMiss; }
 
+      cacheLine * hit(unsigned address); // returns NULL if not in cache, otherwise returns pointer to line
+
    private:
       unsigned blockSize;
       unsigned cacheSize;
       unsigned assoc;
       unsigned tHit;
       unsigned tMiss;
-};
+      unsigned numLines;
+      unsigned wordsPerLine;
 
+      cacheLine * lines;
+};
 
 class L2_cache
 {
@@ -76,6 +88,10 @@ class L2_cache
       unsigned tMiss;
       unsigned tTransfer;
       unsigned busWidth;
+      unsigned numLines;
+      unsigned wordsPerLine;
+
+      cacheLine * lines;
 };
 
 class main_memory
@@ -106,3 +122,4 @@ class main_memory
       unsigned chunkSize;
 };
 
+#endif
