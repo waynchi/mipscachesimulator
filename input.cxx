@@ -21,8 +21,8 @@ using namespace std;
 
 //#define strlen 80
 
-extern L1_cache L1;
-extern L2_cache L2;
+extern cache L1;
+extern cache L2;
 extern main_memory mem;
 
 void printParameters();

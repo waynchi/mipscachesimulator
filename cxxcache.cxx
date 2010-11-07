@@ -6,51 +6,17 @@
 //
 // REVISION HISTORY:
 // 11/2/2010   Danny Gale  created
+// 11/5/2010   Danny Gale  consolidated L1 and L2 cache classes into single class
 //
 
 using namespace std;
 
+#include <iostream>
+
 #include "cxxcache.h"
 #include "cacheline.h"
 
-
-// ***TO DO*** need to create a dynamically allocated array of cache entries
-//	       for both L1 and L2, and equivalent for main memory
-// ***TO DO*** create class for cache entry/memory data
-
-L1_cache::L1_cache()
-{
-   // specified parameters
-   blockSize = 32;
-   cacheSize = 8192;
-   assoc = 1;
-   tHit = 1;
-   tMiss = 1;
-
-   // calculated parameters
-   numLines = cacheSize / blockSize;
-   wordsPerLine = blockSize / 16; 
-
-   // create dynamic array
-   lines = new cacheLine[numLines];
-}
-
-L1_cache::~L1_cache()
-{
-   // free dynamic array
-   delete [] lines;
-}
-
-cacheLine * L1_cache::hit(unsigned address)
-{
-   // go through the cache and see if the data is there
-   //for (unsigned i = 0; i < numLines; i++)
-      //if (get_entry(i).get_tag()
-   return 0;
-}
-
-
-L2_cache::L2_cache()
+cache::cache()
 {
    blockSize = 64;
    cacheSize = 65536;
@@ -63,11 +29,47 @@ L2_cache::L2_cache()
    // need dynamic array here
 }
 
-L2_cache::~L2_cache()
+cache::cache(cache_t cacheType)
+{
+   if (cacheType == CACHETYPE_L1)
+   {
+      blockSize = 32;
+      cacheSize = 8192;
+      assoc = 1;
+      tHit = 1;
+      tMiss = 1;
+      tTransfer = 0;
+      busWidth = 0;
+   }
+   else if (cacheType == CACHETYPE_L2)
+   {
+      blockSize = 64;
+      cacheSize = 65536;
+      assoc = 1;
+      tHit = 4;
+      tMiss = 6;
+      tTransfer = 10;
+      busWidth = 16;
+   }
+   else
+   {
+      cout << "ERROR: invalid cache type" << cacheType << endl;
+      exit(2);
+   }
+}
+
+cache::~cache()
 {
    // free dynamic array
 }
 
+cacheLine * cache::hit(unsigned address)
+{
+   // go through the cache and see if the data is there
+   //for (unsigned i = 0; i < numLines; i++)
+      //if (get_entry(i).get_tag()
+   return 0;
+}
 
 
 main_memory::main_memory()

@@ -16,49 +16,15 @@
 using namespace std;
 #include "cacheline.h"
 
-class L1_cache
+enum cache_t { CACHETYPE_L1, CACHETYPE_L2 };
+
+class cache
 {
    public:
       // CONSTRUCTOR AND DESTRUCTOR
-      L1_cache();
-      ~L1_cache();
-
-      // MEMBER FUNCTIONS
-//      bool write();
-//      bool read();
-
-      unsigned get_blockSize() const { return blockSize; }
-      unsigned get_cacheSize() const { return cacheSize; }
-      unsigned get_assoc() const { return assoc; }
-      unsigned get_tHit() const { return tHit; }
-      unsigned get_tMiss() const { return tMiss; }
-
-      void set_blockSize(unsigned newSize) { blockSize = newSize; }
-      void set_cacheSize(unsigned newSize) { cacheSize = newSize; }
-      void set_assoc(unsigned newAssoc) { assoc = newAssoc; }
-      void set_tHit(unsigned newtHit) { tHit = newtHit; }
-      void set_tMiss(unsigned newtMiss) {tMiss = newtMiss; }
-
-      cacheLine * hit(unsigned address); // returns NULL if not in cache, otherwise returns pointer to line
-
-   private:
-      unsigned blockSize;
-      unsigned cacheSize;
-      unsigned assoc;
-      unsigned tHit;
-      unsigned tMiss;
-      unsigned numLines;
-      unsigned wordsPerLine;
-
-      cacheLine * lines;
-};
-
-class L2_cache
-{
-   public:
-      // CONSTRUCTOR AND DESTRUCTOR
-      L2_cache();
-      ~L2_cache();
+      cache();
+      cache(cache_t cacheType);
+      ~cache();
 
       // MEMBER FUNCTIONS
  //     bool write();
@@ -79,6 +45,8 @@ class L2_cache
       void set_tMiss(unsigned newtMiss) {tMiss = newtMiss; }
       void set_tTransfer(unsigned newtTransfer) {tTransfer = newtTransfer; }
       void set_busWidth(unsigned newbusWidth) { busWidth = newbusWidth; }
+
+      cacheLine * hit(unsigned addr);
 
    private:
       unsigned blockSize;

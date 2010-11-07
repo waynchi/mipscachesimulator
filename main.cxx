@@ -21,8 +21,8 @@ using namespace std;
 #include "cxxcache.h"
 
 // GLOBAL VARIABLES
-L1_cache L1;
-L2_cache L2;
+cache L1(CACHETYPE_L1);
+cache L2(CACHETYPE_L2);
 main_memory mem;
 unsigned long long cc; // cycle count
 unsigned long long ic; // instruction count
@@ -32,6 +32,8 @@ unsigned long long ic; // instruction count
 
 extern void get_config (string filename);
 extern void printParameters();
+
+unsigned fetch(unsigned addr);
 
 int main(int argc, char * argv[])
 {
@@ -110,7 +112,7 @@ unsigned fetch(unsigned addr)
          
          // now need to write to L1
          // number of transfers = L1.blockSize / L2.busWidth
-         cc += L2.get_tTransfer * (L1.get_blockSize() / L2.get_busWidth);
+         cc += L2.get_tTransfer() * (L1.get_blockSize() / L2.get_busWidth());
 
          // WRITE TO L1
       }
