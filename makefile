@@ -7,12 +7,15 @@
 # 11/1/2010	created	Danny Gale
 #
 
-OBJS = main.o input.o cxxcache.o cacheline.o
+OBJS = main.o input.o cxxcache.o cacheline.o set.o
 
 cachesim : $(OBJS)
 	g++ -Wall -o cachesim $(OBJS)
 
-cxxcache.o : cxxcache.cxx cacheline.h
+set.o : set.h set.cxx cacheline.h
+	g++ -Wall -c set.cxx
+
+cxxcache.o : cxxcache.cxx cacheline.h set.h
 	g++ -Wall -c cxxcache.cxx
 
 cacheline.o : cacheline.cxx cacheline.h

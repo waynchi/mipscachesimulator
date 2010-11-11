@@ -15,16 +15,13 @@ using namespace std;
 cacheLine::cacheLine()
 {
    valid = false;
+   dirty = false;
    tag = 0;
 }
 
-cacheLine::cacheLine(bool v, unsigned tagval)
+cacheLine::cacheLine(bool v, bool d, unsigned tagval)
 {
    valid = v;
+   dirty = d;
    tag = tagval;
-}
-
-cacheLine::~cacheLine()
-{
-
 }

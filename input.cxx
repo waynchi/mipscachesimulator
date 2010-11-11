@@ -19,20 +19,17 @@
 
 using namespace std;
 
-//#define strlen 80
-
+// EXTERNAL VARIABLES
 extern cache L1;
 extern cache L2;
 extern main_memory mem;
 
+// LOCAL FUNCTIONS
 void printParameters();
 void get_config(string filename);
 
 void get_config(string filename)
 {
-#ifdef _DEBUG_INPUT_
-   cout << "__DEBUG__ beginning of get_config()" << endl;
-#endif
    string param;
    unsigned int value;
    ifstream configFile (filename.c_str());

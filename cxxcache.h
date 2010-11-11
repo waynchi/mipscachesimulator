@@ -14,7 +14,8 @@
 #define _CXXCACHE_H_
 
 using namespace std;
-#include "cacheline.h"
+
+#include "set.h"
 
 enum cache_t { CACHETYPE_L1, CACHETYPE_L2 };
 
@@ -26,10 +27,7 @@ class cache
       cache(cache_t cacheType);
       ~cache();
 
-      // MEMBER FUNCTIONS
- //     bool write();
- //     bool read();
-
+      // CONSTANT MEMBER FUNCTIONS
       unsigned get_blockSize() const { return blockSize; }
       unsigned get_cacheSize() const { return cacheSize; }
       unsigned get_assoc() const { return assoc; }
@@ -38,17 +36,29 @@ class cache
       unsigned get_tTransfer() const { return tTransfer; }
       unsigned get_busWidth() const { return busWidth; }
 
+      // MEMBER FUNCTIONS
+      cacheLine * write(unsigned addr);
+      cacheLine * read(unsigned addr);
+ 
       void set_blockSize(unsigned newSize) { blockSize = newSize; }
       void set_cacheSize(unsigned newSize) { cacheSize = newSize; }
-      void set_assoc(unsigned newAssoc) { assoc = newAssoc; }
+      void set_assoc(unsigned newAssoc); // re-allocate dynamic array of sets
       void set_tHit(unsigned newtHit) { tHit = newtHit; }
       void set_tMiss(unsigned newtMiss) {tMiss = newtMiss; }
       void set_tTransfer(unsigned newtTransfer) {tTransfer = newtTransfer; }
       void set_busWidth(unsigned newbusWidth) { busWidth = newbusWidth; }
 
-      cacheLine * hit(unsigned addr);
+      void incr_wr() { writeRequests++; requests++; }
+      void incr_rr() { readRequests++; requests++; }
+      void incr_wm() { writeMisses++; misses++; }
+      void incr_rm() { readMisses++; misses++; }
+      void incr_wh() { writeHits++; hits++; }
+      void incr_rh() { readHits++; hits++; }
 
    private:
+      set * sets; // array created at runtime after configuration file is read
+
+      // given cache parameters
       unsigned blockSize;
       unsigned cacheSize;
       unsigned assoc;
@@ -56,10 +66,21 @@ class cache
       unsigned tMiss;
       unsigned tTransfer;
       unsigned busWidth;
-      unsigned numLines;
-      unsigned wordsPerLine;
+      // calculated cache parameters
+      unsigned numSets;
+      unsigned blocksPerSet;
+      unsigned wordsPerBlock;
 
-      cacheLine * lines;
+      // statistics
+      unsigned writeRequests;
+      unsigned readRequests;
+      unsigned requests;
+      unsigned writeMisses;
+      unsigned readMisses;
+      unsigned misses;
+      unsigned writeHits;
+      unsigned readHits;
+      unsigned hits;
 };
 
 class main_memory

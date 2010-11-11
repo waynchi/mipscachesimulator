@@ -19,19 +19,22 @@ class cacheLine
    public:
       // CONSTRUCTORS AND DESTRUCTOR
       cacheLine();
-      cacheLine(bool v, unsigned tagval);
-      ~cacheLine();
+      cacheLine(bool v, bool d, unsigned tagval);
 
       // CONSTANT MEMBER FUNCTIONS
       bool get_valid() const { return valid; }
+      bool get_dirty() const { return valid; }
       unsigned get_tag() const { return tag; }
 
       // MEMBER FUNCTIONS
       void set_valid(bool value) { valid = value; }
+      void set_dirty(bool value) { dirty = value; }
       void set_tag(unsigned value) { tag = value; }
+      void set_all(bool v, bool d, unsigned t) { valid = v; dirty = d; tag = t; }
 
    private:
       bool valid;
+      bool dirty;
       unsigned tag;
 
 };

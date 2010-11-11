@@ -15,22 +15,19 @@ using namespace std;
 
 #include "cxxcache.h"
 #include "cacheline.h"
+#include "set.h"
+#include "defines.h"
 
 cache::cache()
 {
-   blockSize = 64;
-   cacheSize = 65536;
-   assoc = 1;
-   tHit = 4;
-   tMiss = 6;
-   tTransfer = 10;
-   busWidth = 16;
-
-   // need dynamic array here
+   cout << endl << "Error: UNINITIALIZED CACHE TYPE" << endl;
+   exit(ES_UNINITIALIZED_CACHE);
 }
 
 cache::cache(cache_t cacheType)
 {
+   unsigned i;
+
    if (cacheType == CACHETYPE_L1)
    {
       blockSize = 32;
@@ -40,6 +37,13 @@ cache::cache(cache_t cacheType)
       tMiss = 1;
       tTransfer = 0;
       busWidth = 0;
+      
+      numLines = cacheSize / (assoc * blockSize);
+
+      sets = new set[numLines];
+
+      for (i = 0; i < numLines; i++)
+	 sets[i].set_associativity(assoc);
    }
    else if (cacheType == CACHETYPE_L2)
    {
@@ -48,19 +52,36 @@ cache::cache(cache_t cacheType)
       assoc = 1;
       tHit = 4;
       tMiss = 6;
-      tTransfer = 10;
+      tTransfer = 6;
       busWidth = 16;
+
+      numLines = cacheSize / (assoc * blockSize);
+
+      sets = new set[numLines];
+
+      for (i = 0; i < numLines; i++)
+	 sets[i].set_associativity(assoc);
    }
    else
    {
       cout << "ERROR: invalid cache type" << cacheType << endl;
-      exit(2);
+      exit(ES_INVALID_CACHE_TYPE);
    }
+   writeRequests = 0;
+   readRequests = 0;
+   requests = 0;
+   writeMisses = 0;
+   readMisses = 0;
+   misses = 0;
+   writeHits = 0;
+   readHits = 0;
+   hits = 0;
 }
 
 cache::~cache()
 {
    // free dynamic array
+   delete [] sets;
 }
 
 cacheLine * cache::hit(unsigned address)
@@ -71,6 +92,13 @@ cacheLine * cache::hit(unsigned address)
    return 0;
 }
 
+// remove and resize dynamic array
+void cache::set_assoc(unsigned value)
+{
+   delete [] sets;
+   sets = new set[value];
+}
+
 
 main_memory::main_memory()
 {
@@ -78,11 +106,9 @@ main_memory::main_memory()
    tReady = 100;
    tChunk = 30;
    chunkSize = 16;
-
-   // need dynamic array here
 }
 
 main_memory::~main_memory()
 {
-   // free dynamic array
+
 }
