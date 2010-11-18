@@ -35,28 +35,35 @@ class cache
       unsigned get_tMiss() const { return tMiss; }
       unsigned get_tTransfer() const { return tTransfer; }
       unsigned get_busWidth() const { return busWidth; }
+      unsigned get_numSets() const { return numSets; }
+      unsigned get_blocksPerSet() const { return blocksPerSet; }
+      unsigned get_bytesPerBlock() const { return bytesPerBlock; }
+      unsigned get_indexBits() const { return indexBits; }
+      unsigned get_byteBits() const { return byteBits; }
+      unsigned get_tagBits() const { return tagBits; }
+      set * get_set(unsigned i) const { return &sets[i]; }
 
       // MEMBER FUNCTIONS
-      cacheLine * write(unsigned addr);
-      cacheLine * read(unsigned addr);
+      cacheLine * hit(unsigned index, unsigned tag);
+      cacheLine * write(unsigned index, unsigned tag);
+      cacheLine * read(unsigned index, unsigned tag);
+
+      unsigned make_tag(unsigned addr) { return (addr >> (tagBits + byteBits)); }
+      unsigned make_index(unsigned addr) { return ( (addr << tagBits) >> (tagBits + byteBits) ); }
  
-      void set_blockSize(unsigned newSize) { blockSize = newSize; }
-      void set_cacheSize(unsigned newSize) { cacheSize = newSize; }
-      void set_assoc(unsigned newAssoc); // re-allocate dynamic array of sets
+      void set_blockSize(unsigned newSize);
+      void set_cacheSize(unsigned newSize);
+      void set_assoc(unsigned newAssoc); 
       void set_tHit(unsigned newtHit) { tHit = newtHit; }
       void set_tMiss(unsigned newtMiss) {tMiss = newtMiss; }
       void set_tTransfer(unsigned newtTransfer) {tTransfer = newtTransfer; }
       void set_busWidth(unsigned newbusWidth) { busWidth = newbusWidth; }
+      void set_numSets(unsigned n);
+      void set_bytesPerBlock(unsigned n);
 
-      void incr_wr() { writeRequests++; requests++; }
-      void incr_rr() { readRequests++; requests++; }
-      void incr_wm() { writeMisses++; misses++; }
-      void incr_rm() { readMisses++; misses++; }
-      void incr_wh() { writeHits++; hits++; }
-      void incr_rh() { readHits++; hits++; }
 
    private:
-      set * sets; // array created at runtime after configuration file is read
+      set * sets; 
 
       // given cache parameters
       unsigned blockSize;
@@ -69,17 +76,24 @@ class cache
       // calculated cache parameters
       unsigned numSets;
       unsigned blocksPerSet;
-      unsigned wordsPerBlock;
+      unsigned bytesPerBlock;
+      unsigned indexBits;
+      unsigned byteBits;
+      unsigned tagBits;
 
       // statistics
+      unsigned writes;
       unsigned writeRequests;
-      unsigned readRequests;
-      unsigned requests;
       unsigned writeMisses;
-      unsigned readMisses;
-      unsigned misses;
       unsigned writeHits;
+
+      unsigned reads;
+      unsigned readRequests;
+      unsigned readMisses;
       unsigned readHits;
+
+      unsigned requests;
+      unsigned misses;
       unsigned hits;
 };
 

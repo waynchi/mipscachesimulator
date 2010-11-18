@@ -15,10 +15,14 @@
 using namespace std;
 
 // COMPILER INCLUDES
-#include <list>
 
 // PROJECT INCLUDES
 #include "cacheline.h"
+
+// THE LINKED LIST POINTED TO BY head MUST BE MAINTAINED
+// MANUALLY SUCH THAT THE LEAST RECENTLY USED CACHELINE
+// IS ALWAYS AT THE TAIL, WITH THE MOST RECENTLY USED BEING
+// POINTED TO BY THE HEAD
 
 class set 
 {
@@ -31,12 +35,16 @@ class set
       void add_line();	// adds an element to "lines." 
    
       // CONSTANT MEMBER FUNCTIONS
-      unsigned get_associativity() { return associativity; }
+      unsigned get_associativity() const { return associativity; }
+      cacheLine * get_block(unsigned i);
+      unsigned get_size() const { return size; }
       
       // MEMBER FUNCTIONS
-      void set_associativity();
       void set_associativity(unsigned assoc);
-      void update_LRU (cacheLine * mostRecent);
+      cacheLine * update_LRU (cacheLine * mostRecent);
+
+      cacheLine * find_line(unsigned t);
+      //cacheLine * find_spot();
 
       // places the new block into the cache. returns a pointer to 
       // a cacheLine if one had to be evicted.
@@ -44,9 +52,11 @@ class set
       // BACK TO L2 and MAIN MEMORY
       cacheLine * put_line(cacheLine * newLine); 
 
+      void output_blocks();
+
    private:
-      list<cacheLine *> LRU;
-      list<cacheLine *> lines;
+      cacheLine * head;
+      unsigned size;
       unsigned associativity;
 };
 

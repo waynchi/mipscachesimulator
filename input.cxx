@@ -20,7 +20,8 @@
 using namespace std;
 
 // EXTERNAL VARIABLES
-extern cache L1;
+extern cache I;
+extern cache D;
 extern cache L2;
 extern main_memory mem;
 
@@ -36,10 +37,7 @@ void get_config(string filename)
 
    // check for valid configuration file
    if (!configFile.is_open())
-   {
       cout << "Invalid configuration file" << endl << "Using default values" << endl;
-      //printf("Invalid Configuration File!\nUsing default values\n");
-   }
    else
    {
       cout << "Using configuration file " << filename << endl;
@@ -48,15 +46,30 @@ void get_config(string filename)
       {
 	 configFile >> param >> value;
 	 if (param.compare("L1.blockSize") == 0)
-	    L1.set_blockSize(value);
+	 {
+	    I.set_blockSize(value);
+	    D.set_blockSize(value);
+	 }
 	 else if (param.compare("L1.cacheSize") == 0)
-	    L1.set_cacheSize(value);
+	 {
+	    I.set_cacheSize(value);
+	    D.set_cacheSize(value);
+	 }
 	 else if (param.compare("L1.assoc") == 0)
-	    L1.set_assoc(value);
+	 {
+	    I.set_assoc(value);
+	    D.set_assoc(value);
+	 }
 	 else if (param.compare("L1.tHit") == 0)
-	    L1.set_tHit(value);
+	 {
+	    I.set_tHit(value);
+	    D.set_tHit(value);
+	 }
 	 else if (param.compare("L1.tMiss") == 0)
-	    L1.set_tMiss(value);
+	 {
+	    I.set_tMiss(value);
+	    D.set_tMiss(value);
+	 }
 	 else if (param.compare("L2.blockSize") == 0)
 	    L2.set_blockSize(value);
 	 else if (param.compare("L2.cacheSize") == 0)
@@ -92,14 +105,18 @@ void get_config(string filename)
 void printParameters()
 {
    cout << endl << "CACHE PARAMETERS:\tL1:\tL2:" << endl;
-   cout << "blockSize\t=\t" << L1.get_blockSize() <<"\t" << L2.get_blockSize() << endl;
-   cout << "cacheSize\t=\t" << L1.get_cacheSize() << "\t" << L2.get_cacheSize() << endl;
-   cout << "assoc\t\t=\t" << L1.get_assoc() << "\t" << L2.get_assoc() << endl;
-   cout << "tHit\t\t=\t" << L1.get_tHit() << "\t" << L2.get_tHit() << endl;
-   cout << "tMiss\t\t=\t" << L1.get_tMiss() << "\t" << L2.get_tMiss() << endl;
+   cout << "blockSize\t=\t" << I.get_blockSize() <<"\t" << L2.get_blockSize() << endl;
+   cout << "cacheSize\t=\t" << I.get_cacheSize() << "\t" << L2.get_cacheSize() << endl;
+   cout << "assoc\t\t=\t" << I.get_assoc() << "\t" << L2.get_assoc() << endl;
+   cout << "tHit\t\t=\t" << I.get_tHit() << "\t" << L2.get_tHit() << endl;
+   cout << "tMiss\t\t=\t" << I.get_tMiss() << "\t" << L2.get_tMiss() << endl;
    cout << "tTransfer\t=\t\t" << L2.get_tTransfer() << endl;
    cout << "busWidth\t=\t\t" << L2.get_busWidth() << endl;
-
+   cout << "numSets\t\t=\t" << I.get_numSets() << "\t" << L2.get_numSets() << endl;
+   cout << "bytesPerBlock\t=\t" << I.get_bytesPerBlock() << "\t" << L2.get_bytesPerBlock() << endl;
+   cout << "indexBits\t=\t" << I.get_indexBits() << "\t" << L2.get_indexBits() << endl;
+   cout << "byteBits\t=\t" << I.get_byteBits() << "\t" << L2.get_byteBits() << endl;
+   cout << "tagBits\t\t=\t" << I.get_tagBits() << "\t" << L2.get_tagBits() << endl;
 
    cout << endl << "MEMORY PARAMETERS:" << endl;
    cout << "tSendAddr\t=\t" << mem.get_tSendAddr() << endl;
