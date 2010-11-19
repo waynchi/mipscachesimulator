@@ -117,7 +117,7 @@ void set::set_associativity(unsigned assoc)
 // returns a cacheLine * if one was evicted
 cacheLine * set::update_LRU(cacheLine * mostRecent)
 {
-   cacheLine * cursor, *temp, *oldHead;
+   cacheLine * cursor, * temp, * oldHead;
 
    temp = head;
 
@@ -146,6 +146,7 @@ cacheLine * set::update_LRU(cacheLine * mostRecent)
    // which is currently pointed to by cursor
 
    // set temp as the tail
+   delete (temp->get_next());
    temp->set_next(0);
 
    // and add the new one to the head

@@ -36,6 +36,7 @@ cacheLine::cacheLine(bool v, bool d, unsigned tagval, cacheLine * n)
    tag = tagval;
    next = n;
 }
+*/
 
 cacheLine::cacheLine(unsigned tagval, cacheLine * n)
 {
@@ -44,4 +45,4 @@ cacheLine::cacheLine(unsigned tagval, cacheLine * n)
    tag = tagval;
    next = n;
 }
-*/
+

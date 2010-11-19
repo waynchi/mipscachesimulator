@@ -22,8 +22,8 @@ class cacheLine
       /*
       cacheLine(bool v, bool d, unsigned tagval);
       cacheLine(bool v, bool d, unsigned tagval, cacheLine * n);
-      cacheLine(unsigned tagval, cacheLine * n);
       */
+      cacheLine(unsigned tagval, cacheLine * n);
 
       // CONSTANT MEMBER FUNCTIONS
       bool get_valid() const { return valid; }

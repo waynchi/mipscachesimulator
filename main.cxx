@@ -126,7 +126,7 @@ int main(int argc, char * argv[])
       cout << "========== FETCHING INSTRUCTION ==========" << endl;
 #endif
       cin >> op >> hex >> addr >> hex >> exec;
-      cout << "inst #:\t" << setw(8) << ic << "\top: " << op << "\taddr: " << setw(8) << hex << addr << "\texec: " << setw(8) << hex << exec << endl;
+      cout << "inst #:\t" << setw(8) << dec << ic << "\top: " << op << "\taddr: " << setw(8) << hex << addr << "\texec: " << setw(8) << hex << exec << endl;
 
       cc += fetch(&I, addr, READ);
 
@@ -169,24 +169,14 @@ int main(int argc, char * argv[])
    }
 
 #ifdef _OUTPUT_CACHES_
-   unsigned m, n = 0;
-   cacheLine * block;
-   set * thisSet;
+   //unsigned m, n = 0;
 
    cout << endl << "CACHE \"I\" FINAL STATE" << endl;
-   for (m = 0; m < I.get_numSets(); m++)
+   for (i = 0; i < I.get_numSets(); i++)
    {
       cout << endl;
-      thisSet = I.get_set(m);
-      cout << "Set#: " << setw(4) << m << " | ";
-      cout << "associativity = " << dec << thisSet->get_associativity() << endl;
-      for (n = 0; n < thisSet->get_associativity(); n++)
-      {
-	 cout << "getting block" << endl;
-	 block = thisSet->get_block(n);
-	 cout << "got block. getting tag" << endl;
-	 cout << " " << setw(4) << block->get_tag();
-      }
+      cout << dec << "Set#: " << setw(4) << i << " | ";
+      I.get_set(i)->output_blocks();
    }
    cout << endl;
 #endif

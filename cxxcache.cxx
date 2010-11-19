@@ -191,6 +191,10 @@ cacheLine * cache::read(unsigned index, unsigned tag)
    return ptr;
 }
 
+// NOT A WRITE REQUEST, JUST A WRITE
+// do not search for valid block with the right tag,
+// just write into the cache, replacing the least recently
+// used line
 cacheLine * cache::write(unsigned index, unsigned tag)
 {
    cacheLine * ptr = 0;
@@ -201,8 +205,13 @@ cacheLine * cache::write(unsigned index, unsigned tag)
    ////////////////////////
    writes++;
 
+   ptr = new cacheLine(tag, 0);
+
+   return sets[index].update_LRU(ptr);
+
+   /*
 #ifdef _DEBUG_CACHE_WRITE_
-   cout << "_DEBUG_CACHE_WRITE_\tindex:\t" << index << "\ttag\t" << tag <<endl;
+   cout << "_DEBUG_CACHE_WRITE_\tindex:\t" << index << "\ttag:\t" << tag <<endl;
 #endif
 
    // need to find the line in the set
@@ -230,7 +239,11 @@ cacheLine * cache::write(unsigned index, unsigned tag)
    {  // miss
 #ifdef _DEBUG_CACHE_WRITE_
       cout << "_DEBUG_CACHE_WRITE_\tDid not find valid block with tag = " << tag << endl;
+      cout << "_DEBUG_CACHE_WRITE_\tEvicting a block" << endl;
 #endif
+      ptr = new cacheLine(tag, sets[index].get_head());
+      sets[index].update_LRU(ptr);
+
       // update statistics
       ////////////////////////
       // update the statistics
@@ -238,8 +251,7 @@ cacheLine * cache::write(unsigned index, unsigned tag)
       writeMisses++;
       misses++;
    }
-
-   return ptr;
+*/
 }
 
 main_memory::main_memory()

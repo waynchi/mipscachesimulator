@@ -37,6 +37,7 @@ class set
       // CONSTANT MEMBER FUNCTIONS
       unsigned get_associativity() const { return associativity; }
       cacheLine * get_block(unsigned i);
+      cacheLine * get_head() { return head; }
       unsigned get_size() const { return size; }
       
       // MEMBER FUNCTIONS
