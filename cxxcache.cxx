@@ -208,50 +208,6 @@ cacheLine * cache::write(unsigned index, unsigned tag)
    ptr = new cacheLine(tag, 0);
 
    return sets[index].update_LRU(ptr);
-
-   /*
-#ifdef _DEBUG_CACHE_WRITE_
-   cout << "_DEBUG_CACHE_WRITE_\tindex:\t" << index << "\ttag:\t" << tag <<endl;
-#endif
-
-   // need to find the line in the set
-   ptr = sets[index].find_line(tag);
-
-   if (ptr)
-   {  // found it
-#ifdef _DEBUG_CACHE_WRITE_
-      cout << "_DEBUG_CACHE_WRITE_\tFound valid block with tag = " << ptr->get_tag() << endl;
-#endif
-      // update LRU
-      sets[index].update_LRU(ptr);
-
-      // update stats
-      ////////////////////////
-      // update the statistics
-      ////////////////////////
-      writeHits++;
-      hits++;
-
-      // MARK IT AS DIRTY
-      ptr->set_dirty(true);
-   }
-   else
-   {  // miss
-#ifdef _DEBUG_CACHE_WRITE_
-      cout << "_DEBUG_CACHE_WRITE_\tDid not find valid block with tag = " << tag << endl;
-      cout << "_DEBUG_CACHE_WRITE_\tEvicting a block" << endl;
-#endif
-      ptr = new cacheLine(tag, sets[index].get_head());
-      sets[index].update_LRU(ptr);
-
-      // update statistics
-      ////////////////////////
-      // update the statistics
-      ////////////////////////
-      writeMisses++;
-      misses++;
-   }
-*/
 }
 
 main_memory::main_memory()

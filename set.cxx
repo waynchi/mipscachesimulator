@@ -117,44 +117,62 @@ void set::set_associativity(unsigned assoc)
 // returns a cacheLine * if one was evicted
 cacheLine * set::update_LRU(cacheLine * mostRecent)
 {
-   cacheLine * cursor, * temp, * oldHead;
+#ifdef _DEBUG_SET_UPDATELRU_
+   cout << "BEGIN _DEBUG_SET_UPDATELRU_\tmost recent: tag = " << mostRecent->get_tag() << endl;
+#endif
+   cacheLine * cursor, * oldHead, * retPtr;
 
-   temp = head;
-
-   // check the set to see if it's currently there
-   for (cursor = head; cursor != 0; cursor = cursor->get_next())
+#ifdef _DEBUG_SET_UPDATELRU_
+   cout << "_DEBUG_SET_UPDATELRU_\tchecking set for tag " << mostRecent->get_tag() << endl;
+#endif
+   // check the set to see if it's currently the head
+   if (head == mostRecent)
+   {
+#ifdef _DEBUG_SET_UPDATELRU_
+	 cout << " at the head. returning" << endl;
+	 cout << "END _DEBUG_SET_UPDATELRU_" << endl;
+#endif
+	    return 0;
+   }
+   // check the set to see if it's currently elsewhere in the list
+   for (cursor = head; cursor->get_next() != 0; cursor = cursor->get_next())
    {
       if (cursor == mostRecent)
       {	 // found it
-	 if (cursor == head) // it's already the head
-	    return 0;
-	 else
-	 {
-	    // if it's not already the head
-	    // move it to the head 
-	    temp->set_next(cursor->get_next());
-	    cursor->set_next(head);
-	    head = cursor;
-	    return 0;
-	 }
+#ifdef _DEBUG_SET_UPDATELRU_
+	 cout << "_DEBUG_SET_UPDATELRU_\ttag has been found in the set not at the head. moving to head and returning" << endl;
+#endif
+	 // if it's not already the head
+	 // move it to the head 
+	 oldHead = head;
+	 head = cursor->get_next();
+	 cursor->set_next(cursor->get_next()->get_next());
+	 head->set_next(oldHead);
+#ifdef _DEBUG_SET_UPDATELRU_
+	 cout << "END _DEBUG_SET_UPDATELRU_" << endl;
+#endif
+	 return 0;
       }
-      temp = cursor;
    }
+
+#ifdef _DEBUG_SET_UPDATELRU_
+   cout << "_DEBUG_SET_UPDATELRU_\ttag WAS NOT found in the set" << endl;
+#endif
 
    // ok, we didn't find it
    // we need to evict the least recently used one
    // which is currently pointed to by cursor
 
-   // set temp as the tail
-   delete (temp->get_next());
-   temp->set_next(0);
-
-   // and add the new one to the head
-   oldHead = head;
+   retPtr = cursor->get_next();
+   cursor->set_next(0);
+   mostRecent->set_next(head);
    head = mostRecent;
-   head->set_next(oldHead);
+#ifdef _DEBUG_SET_UPDATELRU_
+   cout << "returning retPtr = " << retPtr << endl;
+   cout << "END _DEBUG_SET_UPDATELRU_" << endl;
+#endif
 
-   return cursor;
+   return retPtr;
 }
 
 

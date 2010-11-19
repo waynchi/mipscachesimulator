@@ -36,6 +36,7 @@ enum op_type { READ, WRITE };
 //#define _DEBUG_L2_STRUCTURE_
 //#define _DEBUG_CACHE_HIT_
 //#define _DEBUG_SET_FINDLINE_
+#define _DEBUG_SET_UPDATELRU_
 
 #define _OUTPUT_CACHES_
 
