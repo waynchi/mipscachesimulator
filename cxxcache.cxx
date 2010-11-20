@@ -142,7 +142,7 @@ void cache::set_bytesPerBlock(unsigned n)
 cacheLine * cache::hit(unsigned index, unsigned tag)
 {
 #ifdef _DEBUG_CACHE_HIT_
-   cout << "_DEBUG_CACHE_HIT_\tInside cache::hit using index " << index << " and tag " << tag << endl;
+   cout << "\t_DEBUG_CACHE_HIT_\tInside cache::hit using index " << index << " and tag " << tag << endl;
 #endif
 
    // index to the set, go through the set and see if the data is there
@@ -150,7 +150,7 @@ cacheLine * cache::hit(unsigned index, unsigned tag)
    // or a pointer to it if it is found & valid
    cacheLine * ptr = sets[index].find_line(tag);
 #ifdef _DEBUG_CACHE_HIT_
-   cout << "_DEBUG_CACHE_HIT_\tptr has been set to " << ptr << endl << "_DEBUG_CACHE_HIT_\tReturning ptr" << endl;
+   cout << "\t_DEBUG_CACHE_HIT_\tptr has been set to " << ptr << endl << "_DEBUG_CACHE_HIT_\tReturning ptr" << endl;
 #endif
 
    return ptr;

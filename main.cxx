@@ -65,10 +65,10 @@ int main(int argc, char * argv[])
    }
    printParameters();
    
-
-#ifdef _DEBUG_L1_STRUCTURE_
    unsigned i;
 
+// INITIALIZATION-DEBUGGING CONDITIONAL COMPILATION CODE
+#ifdef _DEBUG_L1_STRUCTURE_
 #ifdef _DEBUG_L1_STRUCTURE_FAKEDATA_
    unsigned j, val;
    // put some fake data in the instruction cache
@@ -110,6 +110,8 @@ int main(int argc, char * argv[])
    cout << endl;
 #endif
 
+
+
    // BEGIN ACCEPTING TRACE CODE HERE
    cout << endl << "=============";
    cout << "Begin Trace";
@@ -117,7 +119,6 @@ int main(int argc, char * argv[])
    while (!cin.eof())
    {
       cout << endl;
-
 
       ic++; // increment instruction count
 
@@ -149,14 +150,14 @@ int main(int argc, char * argv[])
 	    break;
 	 case 'L':   // load. exec contains address of requested data
 #ifdef _DEBUG_FETCH_
-      cout << "Load instruction." << endl << "========== FETCHING DATA ==========" << endl;
+      cout << "========== LOAD: FETCHING DATA ==========" << endl;
 #endif
 	    cc += fetch(&D, exec, READ);
 	    load++;
 	    break;
 	 case 'S':   // store. exec contains address of data to be written
 #ifdef _DEBUG_FETCH_
-      cout << "Store instruction." << endl << "========== FETCHING DATA ==========" << endl;
+      cout << "========== STORE: FETCHING DATA =========" << endl;
 #endif
 	    cc += fetch(&D, exec, WRITE);
 	    store++;
@@ -168,15 +169,33 @@ int main(int argc, char * argv[])
       }
    }
 
-#ifdef _OUTPUT_CACHES_
-   //unsigned m, n = 0;
-
+#ifdef _OUTPUT_CACHE_I_
    cout << endl << "CACHE \"I\" FINAL STATE" << endl;
    for (i = 0; i < I.get_numSets(); i++)
    {
       cout << endl;
       cout << dec << "Set#: " << setw(4) << i << " | ";
       I.get_set(i)->output_blocks();
+   }
+   cout << endl;
+#endif
+#ifdef _OUTPUT_CACHE_D_
+   cout << endl << "CACHE \"D\" FINAL STATE" << endl;
+   for (i = 0; i < D.get_numSets(); i++)
+   {
+      cout << endl;
+      cout << dec << "Set#: " << setw(4) << i << " | ";
+      D.get_set(i)->output_blocks();
+   }
+   cout << endl;
+#endif
+#ifdef _OUTPUT_CACHE_L2_
+   cout << endl << "CACHE \"L2\" FINAL STATE" << endl;
+   for (i = 0; i < L2.get_numSets(); i++)
+   {
+      cout << endl;
+      cout << dec << "Set#: " << setw(4) << i << " | ";
+      L2.get_set(i)->output_blocks();
    }
    cout << endl;
 #endif
@@ -187,9 +206,6 @@ int main(int argc, char * argv[])
 // returns time taken to fetch 
 unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
 {
-#ifdef _DEBUG_FETCH_
-   cout << "========== BEGIN _DEBUG_FETCH_ ==========" << endl;
-#endif
    unsigned fetchTime = 0;
    unsigned index = thisCache->make_index(addr);
    unsigned tag = thisCache->make_tag(addr);
@@ -198,7 +214,7 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
    // ptr will point to the found block, or will be zero if
    // the block was not found in L1
 #ifdef _DEBUG_FETCH_
-   cout << "Checking L1 for address " << addr << " using index " << index << " and tag " << tag << endl;
+   cout << "_DEBUG_FETCH_\tChecking L1 for address " << addr << " using index " << index << " and tag " << tag << endl;
 #endif
    ptr = thisCache->hit(index, tag);
 
@@ -206,20 +222,20 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
    {  // L1 hit
       fetchTime += thisCache->get_tHit();
 #ifdef _DEBUG_FETCH_
-      cout << "address " << addr << " was found in L1" << endl;
-      cout << "fetchTime += L1.get_tHit() = " << dec << fetchTime << endl;
+      cout << "_DEBUG_FETCH_\taddress " << addr << " was found in L1" << endl;
+      //cout << "fetchTime += L1.get_tHit() = " << dec << fetchTime << endl;
 #endif
       switch (operation)
       {
 	 case READ:
 #ifdef _DEBUG_FETCH_
-	    cout << "reading " << addr << " from L1" << endl;
+	    cout << "_DEBUG_FETCH_\treading " << addr << " from L1" << endl;
 #endif
 	    thisCache->read(index, tag);
 	    break;
 	 case WRITE:
 #ifdef _DEBUG_FETCH_
-	    cout << "writing " << addr << " into L1" << endl;
+	    cout << "_DEBUG_FETCH_\tupdating address " << addr << " in L1" << endl;
 #endif
 	    thisCache->write(index, tag);
 	    break;
@@ -234,8 +250,8 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
       fetchTime += thisCache->get_tMiss(); 
 
 #ifdef _DEBUG_FETCH_
-      cout << "address " << addr << " was NOT found in L1. Going to L2" << endl;
-      cout << "fetchTime += L1.get_tMiss = " << dec << fetchTime << endl;
+      cout << "_DEBUG_FETCH_\taddress " << addr << " was NOT found in L1. Going to L2" << endl;
+      //cout << "_DEBUG_FETCH_\tfetchTime += L1.get_tMiss = " << dec << fetchTime << endl;
 #endif
 
       // ptr will point to the found block, or will be zero if
@@ -253,8 +269,9 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
 	 fetchTime += mem.get_tChunk() * (L2.get_blockSize() / mem.get_chunkSize());
 
 #ifdef _DEBUG_FETCH_
-      cout << "address " << addr << " was NOT found in L2. Going to main memory" << endl;
-      cout << "fetchTime += L2.get_tMiss + mem->L2 transfer = " << dec << fetchTime << endl;
+      cout << "_DEBUG_FETCH_\taddress " << addr << " was NOT found in L2. Going to main memory" << endl;
+      //cout << "fetchTime += L2.get_tMiss + mem->L2 transfer = " << dec << fetchTime << endl;
+      cout << "_DEBUG_FETCH_\twriting data from main memory to L2" << endl;
 #endif
 
 	 // write the "data" to L2
@@ -265,8 +282,8 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
 	    // add time to write to main memory
 	    fetchTime += mem.get_tChunk() * (L2.get_blockSize() / mem.get_chunkSize());
 #ifdef _DEBUG_FETCH_
-	    cout << "A line (tag " << ptr->get_tag() << ") was evicted and written back to main memory" << endl;
-	    cout << "fetchTime += L2->main mem = " << dec << fetchTime << endl;
+	    cout << "_DEBUG_FETCH_\tA line (tag " << ptr->get_tag() << ") was evicted and written back to main memory" << endl;
+	    //cout << "fetchTime += L2->main mem = " << dec << fetchTime << endl;
 #endif
 	 }
  
@@ -274,8 +291,8 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
       fetchTime += L2.get_tHit();
 
 #ifdef _DEBUG_FETCH_
-      cout << "Address found in L2" << endl;
-      cout << "fetchTime += L2.get_tHit = " << dec << fetchTime << endl;
+      cout << "_DEBUG_FETCH_\tAddress found in L2" << endl;
+      //cout << "fetchTime += L2.get_tHit = " << dec << fetchTime << endl;
 #endif
 
       ////////////////////
@@ -284,8 +301,8 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
       // add time for transfer from L2 to L1
       fetchTime += L2.get_tTransfer() * ( thisCache->get_blockSize() / L2.get_busWidth() );
 #ifdef _DEBUG_FETCH_
-      cout << "Writing L1 from L2" << endl;
-      cout << "fetchTime += L2->L1 transfer = " << dec << fetchTime << endl;
+      cout << "_DEBUG_FETCH_\tWriting L1 from L2" << endl;
+      //cout << "fetchTime += L2->L1 transfer = " << dec << fetchTime << endl;
 #endif
 
       // if a line is evicted from L1
@@ -296,16 +313,16 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
 	 // add time for transfer
 	 fetchTime += L2.get_tTransfer() * ( thisCache->get_blockSize() / L2.get_busWidth() );
 #ifdef _DEBUG_FETCH_
-	 cout << "A line was evicted from L1 when it was written to. Writing back to L2" << endl;
-	 cout << "fetchTime += L1->L2 writeback = " << dec << fetchTime << endl;
+	 cout << "_DEBUG_FETCH_\tA line was evicted from L1 when it was written to. Writing back to L2" << endl;
+	 //cout << "fetchTime += L1->L2 writeback = " << dec << fetchTime << endl;
 #endif
 	 // if a line is evicted from L2, write to main mem
 	 if (ptr && ptr->get_valid() && ptr->get_dirty())
 	 {
 	    fetchTime += mem.get_tChunk() * (L2.get_blockSize() / mem.get_chunkSize());
 #ifdef _DEBUG_FETCH_
-	    cout << "A line was evicted from L2 when it was written to. Writing back to main mem" << endl;
-	    cout << "fetchTime += L2->main mem writeback = " << dec << fetchTime << endl;
+	    cout << "_DEBUG_FETCH_\tA line was evicted from L2 when it was written to. Writing back to main mem" << endl;
+	    //cout << "fetchTime += L2->main mem writeback = " << dec << fetchTime << endl;
 #endif
 	 }
       }
@@ -317,15 +334,15 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
 	    // read L1, then done
 	    fetchTime += thisCache->get_tHit();
 #ifdef _DEBUG_FETCH_
-	    cout << "Operation is a read. Reading L1." << endl;
-	    cout << "fetchTime += L1.get_tHit = " << dec << fetchTime << endl;
+	    cout << "_DEBUG_FETCH_\tOperation is a read. Reading L1." << endl;
+	    //cout << "fetchTime += L1.get_tHit = " << dec << fetchTime << endl;
 #endif
 	    break;
 	 case WRITE:
 	    // if operation is a write
 	    // done
 #ifdef _DEBUG_FETCH_
-	    cout << "Operation is a write. Updating L1." << endl;
+	    cout << "_DEBUG_FETCH_\tOperation is a write. Updating L1." << endl;
 	    //cout << "fetchTime += L1.get_tHit = " << dec << fetchTime << endl;
 #endif
 	    break;
@@ -335,8 +352,7 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
       }
    }
 #ifdef _DEBUG_FETCH_ 
-   cout << "Final fetchTime: " << fetchTime << endl;
-   cout << "========== END OF _DEBUG_FETCH_ ==========" << endl;
+   cout << "_DEBUG_FETCH_\tfetchTime: " << fetchTime << endl;
 #endif
 
    return fetchTime;

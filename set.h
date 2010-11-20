@@ -31,9 +31,6 @@ class set
       set();
       ~set();
       
-      // NON-CONSTRUCTOR INITIALIZATION
-      void add_line();	// adds an element to "lines." 
-   
       // CONSTANT MEMBER FUNCTIONS
       unsigned get_associativity() const { return associativity; }
       cacheLine * get_block(unsigned i);
