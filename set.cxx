@@ -116,7 +116,7 @@ cacheLine * set::update_LRU(cacheLine * mostRecent)
    cacheLine * cursor, * oldHead, * retPtr;
 
 #ifdef _DEBUG_SET_UPDATELRU_
-   cout << "\t_DEBUG_SET_UPDATELRU_\tchecking set for tag " << mostRecent->get_tag() << endl;
+   cout << "\t_DEBUG_SET_UPDATELRU_\tchecking set (size = " << size << ", assoc = " << associativity << ") for tag " << mostRecent->get_tag() << endl;
 #endif
    // check the set to see if it's currently the head
    if (head == mostRecent)
@@ -126,12 +126,22 @@ cacheLine * set::update_LRU(cacheLine * mostRecent)
 #endif
 	    return 0;
    }
+   else if (head == 0)
+   {
+#ifdef _DEBUG_SET_UPDATELRU_
+	 cout << "\t_DEBUG_SET_UPDATELRU_\tset is empty. setting mostRecent as head. returning" << endl;
+#endif
+	 head = mostRecent;
+	 size++;
+	 return 0;
+   }
+
    // check the set to see if it's currently elsewhere in the list
 #ifdef _DEBUG_SET_UPDATELRU_
    cout << "\t_DEBUG_SET_UPDATELRU_\ttag was NOT found at the head. Searching the rest of the set" << endl;
 #endif
 
-   for (cursor = head; cursor != 0; cursor = cursor->get_next())
+   for (cursor = head; cursor->get_next() != 0; cursor = cursor->get_next())
    {
       if (cursor == mostRecent)
       {	 // found it
@@ -157,12 +167,29 @@ cacheLine * set::update_LRU(cacheLine * mostRecent)
    // IF the set is full
    // which is currently pointed to by cursor
 
+#ifdef _DEBUG_SET_UPDATELRU_
+      cout << "\t_DEBUG_SET_UPDATELRU_\tcursor = " << cursor << endl;
+#endif
    if (size == associativity)
    {
-      retPtr = cursor->get_next();
-      cursor->set_next(0);
-      mostRecent->set_next(head);
-      head = mostRecent;
+#ifdef _DEBUG_SET_UPDATELRU_
+      cout << "\t_DEBUG_SET_UPDATELRU_\tsize == associativity" << endl;
+#endif
+      if (cursor->get_next() == 0)
+      {  // found at the end of the list. 
+	 oldHead = head;
+	 head = mostRecent;
+	 head->set_next(oldHead);
+	 // size stays the same
+	 retPtr = cursor;
+      }
+      else
+      {
+	 retPtr = cursor->get_next();
+      	 cursor->set_next(0);
+      	 mostRecent->set_next(head);
+      	 head = mostRecent;
+      }
 #ifdef _DEBUG_SET_UPDATELRU_
       cout << "\t_DEBUG_SET_UPDATELRU_\tset is full. evicting least recently used block" << endl;
 #endif
@@ -176,6 +203,7 @@ cacheLine * set::update_LRU(cacheLine * mostRecent)
       head = mostRecent;
       mostRecent->set_next(oldHead);
       retPtr = 0;
+      size++;
    }
    else
    {

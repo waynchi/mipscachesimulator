@@ -19,10 +19,6 @@ class cacheLine
    public:
       // CONSTRUCTORS AND DESTRUCTOR
       cacheLine();
-      /*
-      cacheLine(bool v, bool d, unsigned tagval);
-      cacheLine(bool v, bool d, unsigned tagval, cacheLine * n);
-      */
       cacheLine(unsigned tagval, cacheLine * n);
 
       // CONSTANT MEMBER FUNCTIONS
