@@ -164,6 +164,7 @@ cacheLine * cache::read(unsigned index, unsigned tag)
    ////////////////////////
    // update the statistics
    ////////////////////////
+   reads++;
 
    // go find the line in the set
    ptr = sets[index].find_line(tag);
@@ -199,15 +200,45 @@ cacheLine * cache::write(unsigned index, unsigned tag)
 {
    cacheLine * ptr = 0;
 
-   // writing, not a write request
    ////////////////////////
    // update the statistics
    ////////////////////////
    writes++;
 
-   ptr = new cacheLine(tag, 0);
+   ptr = sets[index].find_line(tag);
+   if (ptr == 0)
+   {
+#ifdef _DEBUG_CACHE_WRITE_
+   cout << "\t_DEBUG_CACHE_WRITE_\tline with tag " << tag << " was not found in set. creating new line and calling update_LRU" << endl;
+#endif
+      ptr = new cacheLine(tag, 0);
+      writeMisses++;
+   }
+   else
+   {
+#ifdef _DEBUG_CACHE_WRITE_
+      cout << "\t_DEBUG_CACHE_WRITE_\tline with tag " << tag << " was found in set" << endl;
+#endif
+      writeHits++;
+   }
 
    return sets[index].update_LRU(ptr);
+}
+
+unsigned cache::make_tag(unsigned addr)
+{
+   unsigned t;
+
+   t = addr >> (indexBits + byteBits);
+   return t;
+}
+
+unsigned cache::make_index(unsigned addr)
+{
+   unsigned i;
+
+   i = (addr << tagBits) >> (tagBits + byteBits);
+   return i;
 }
 
 main_memory::main_memory()

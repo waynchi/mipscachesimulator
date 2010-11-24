@@ -1,0 +1,27 @@
+
+TRACE STATISTICS
+actual completion time:	0 : 0 : 0
+total instructions:	1001
+total cycles:		22695
+average CPI:		22.6723
+load instructions	89	[ 8.89111 % ]
+store instructions	44	[ 4.3956 % ]
+branch instructions	513	[ 51.2488 % ]
+compute instructions	355	[ 35.4645 % ]
+
+CACHE STATISTICS	L1-I	L1-D	L2
+total reads	=	956	38	0
+total writes	=	45	95	138
+
+total misses	=	0	0	0
+total hits	=	1912	78	0
+
+read hits	=	956	38	0
+write hits	=	0	2	0
+
+read misses	=	0	0	0
+write misses	=	45	93	138
+
+read requests	=	0	0	0
+write requests	=	0	0	0
+

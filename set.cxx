@@ -113,20 +113,13 @@ cacheLine * set::update_LRU(cacheLine * mostRecent)
 #ifdef _DEBUG_SET_UPDATELRU_
    cout << "\t_DEBUG_SET_UPDATELRU_\tmost recent: tag = " << mostRecent->get_tag() << endl;
 #endif
-   cacheLine * cursor, * oldHead, * retPtr;
+   cacheLine * cursor, * prevCursor, * oldHead, * retPtr;
 
 #ifdef _DEBUG_SET_UPDATELRU_
    cout << "\t_DEBUG_SET_UPDATELRU_\tchecking set (size = " << size << ", assoc = " << associativity << ") for tag " << mostRecent->get_tag() << endl;
 #endif
-   // check the set to see if it's currently the head
-   if (head == mostRecent)
-   {
-#ifdef _DEBUG_SET_UPDATELRU_
-	 cout << "\t_DEBUG_SET_UPDATELRU_\ttag was found at the head. returning" << endl;
-#endif
-	    return 0;
-   }
-   else if (head == 0)
+
+   if (head == 0)
    {
 #ifdef _DEBUG_SET_UPDATELRU_
 	 cout << "\t_DEBUG_SET_UPDATELRU_\tset is empty. setting mostRecent as head. returning" << endl;
@@ -135,88 +128,108 @@ cacheLine * set::update_LRU(cacheLine * mostRecent)
 	 size++;
 	 return 0;
    }
-
-   // check the set to see if it's currently elsewhere in the list
-#ifdef _DEBUG_SET_UPDATELRU_
-   cout << "\t_DEBUG_SET_UPDATELRU_\ttag was NOT found at the head. Searching the rest of the set" << endl;
-#endif
-
-   for (cursor = head; cursor->get_next() != 0; cursor = cursor->get_next())
+   else if (head == mostRecent)
    {
-      if (cursor == mostRecent)
-      {	 // found it
 #ifdef _DEBUG_SET_UPDATELRU_
-	 cout << "\t_DEBUG_SET_UPDATELRU_\ttag has been found in the set not at the head. moving to head and returning" << endl;
+	 cout << "\t_DEBUG_SET_UPDATELRU_\ttag was found at the head. returning" << endl;
 #endif
-	 // if it's not already the head
-	 // move it to the head 
-	 oldHead = head;
-	 head = cursor->get_next();
-	 cursor->set_next(cursor->get_next()->get_next());
-	 head->set_next(oldHead);
-	 return 0;
-      }
+      return 0;
    }
-
-#ifdef _DEBUG_SET_UPDATELRU_
-   cout << "\t_DEBUG_SET_UPDATELRU_\ttag was NOT found in the set" << endl;
-#endif
-
-   // ok, we didn't find it
-   // we need to evict the least recently used one
-   // IF the set is full
-   // which is currently pointed to by cursor
-
-#ifdef _DEBUG_SET_UPDATELRU_
-      cout << "\t_DEBUG_SET_UPDATELRU_\tcursor = " << cursor << endl;
-#endif
-   if (size == associativity)
+   else if (associativity == 1)
    {
-#ifdef _DEBUG_SET_UPDATELRU_
-      cout << "\t_DEBUG_SET_UPDATELRU_\tsize == associativity" << endl;
-#endif
-      if (cursor->get_next() == 0)
-      {  // found at the end of the list. 
-	 oldHead = head;
-	 head = mostRecent;
-	 head->set_next(oldHead);
-	 // size stays the same
-	 retPtr = cursor;
-      }
-      else
-      {
-	 retPtr = cursor->get_next();
-      	 cursor->set_next(0);
-      	 mostRecent->set_next(head);
-      	 head = mostRecent;
-      }
-#ifdef _DEBUG_SET_UPDATELRU_
-      cout << "\t_DEBUG_SET_UPDATELRU_\tset is full. evicting least recently used block" << endl;
-#endif
-   }
-   else if (size < associativity)
-   {
-#ifdef _DEBUG_SET_UPDATELRU_
-      cout << "\t_DEBUG_SET_UPDATELRU_\tset is NOT full. adding to head of set" << endl;
-#endif
-      oldHead = head;
+      // simply replace the current head with most recent, return the current head
+      retPtr = head;
       head = mostRecent;
-      mostRecent->set_next(oldHead);
-      retPtr = 0;
-      size++;
+      return retPtr;
    }
    else
    {
+   
+      prevCursor = head;
+      // check the set to see if it's currently in the list
+      for (cursor = head; cursor->get_next() != 0; cursor = cursor->get_next())
+      {
+         if (cursor->get_next() == mostRecent)
+         {	 // found it, one spot beyond cursor
 #ifdef _DEBUG_SET_UPDATELRU_
-      cout << "\t_DEBUG_SET_UPDATELRU_\tERROR: SET IS OVERSIZE" << endl;
-      exit(ES_LINES_OVERSIZE);
+	    cout << "\t_DEBUG_SET_UPDATELRU_\ttag has been found in the set not at the head. moving to head and returning" << endl;
 #endif
+	    // if it's not already the head
+   	    // move it to the head 
+   	    oldHead = head;
+   	    head = cursor->get_next();
+   	    cursor->set_next(cursor->get_next()->get_next());
+   	    head->set_next(oldHead);
+   	    return 0;
+         }
+#ifdef _DEBUG_SET_UPDATELRU_
+         cout << "\t_DEBUG_SET_UPDATELRU_\tcursor = " << cursor << ", prevCursor = " << prevCursor << endl;
+#endif
+      }
+   
+#ifdef _DEBUG_SET_UPDATELRU_
+      cout << "\t_DEBUG_SET_UPDATELRU_\ttag was NOT found in the set" << endl;
+#endif
+   
+      // ok, we didn't find it
+      // we need to evict the least recently used one
+      // IF the set is full
+      // which is currently pointed to by cursor
+   
+#ifdef _DEBUG_SET_UPDATELRU_
+         cout << "\t_DEBUG_SET_UPDATELRU_\tcursor = " << cursor << ", prevCursor = " << prevCursor << endl;
+#endif
+      if (size == associativity)
+      {	 // set is full, size doesn't change
+#ifdef _DEBUG_SET_UPDATELRU_
+         cout << "\t_DEBUG_SET_UPDATELRU_\tsize == associativity. SET IS FULL. cursor = " << cursor << ", prevCursor = " << prevCursor << endl;
+#endif
+         if (cursor->get_next() == 0)
+         {  // found at the end of the list. 
+#ifdef _DEBUG_SET_UPDATELRU_
+         cout << "\t_DEBUG_SET_UPDATELRU_\tCursor is currently at the end of the list" << endl;
+#endif
+	    oldHead = head;
+   	    head = mostRecent;
+   	    head->set_next(oldHead);
+	    prevCursor->set_next(0);
+   	    retPtr = cursor;
+         }
+         else
+         {
+	    retPtr = cursor->get_next();
+            cursor->set_next(0);
+            mostRecent->set_next(head);
+            head = mostRecent;
+         }
+#ifdef _DEBUG_SET_UPDATELRU_
+         cout << "\t_DEBUG_SET_UPDATELRU_\tset is full. evicting least recently used block" << endl;
+#endif
+      }
+      else if (size < associativity)
+      {
+#ifdef _DEBUG_SET_UPDATELRU_
+         cout << "\t_DEBUG_SET_UPDATELRU_\tset is NOT full. adding to head of set" << endl;
+#endif
+         oldHead = head;
+         head = mostRecent;
+         mostRecent->set_next(oldHead);
+         retPtr = 0;
+         size++;
+      }
+      else
+      {
+#ifdef _DEBUG_SET_UPDATELRU_
+         cout << "\t_DEBUG_SET_UPDATELRU_\tERROR: SET IS OVERSIZE" << endl;
+         exit(ES_LINES_OVERSIZE);
+#endif
+      }
+   
+#ifdef _DEBUG_SET_UPDATELRU_
+      cout << "\t_DEBUG_SET_UPDATELRU_\treturning retPtr = " << retPtr << endl;
+#endif
+      return retPtr;
    }
-
-#ifdef _DEBUG_SET_UPDATELRU_
-   cout << "\t_DEBUG_SET_UPDATELRU_\treturning retPtr = " << retPtr << endl;
-#endif
-   return retPtr;
 }
 
 
@@ -239,14 +252,16 @@ cacheLine * set::find_line(unsigned t)
       return 0;
    }
 #ifdef _DEBUG_SET_FINDLINE_
-   cout << "\t_DEBUG_SET_FINDLINE_\tset not empty, searching for tag " << t << endl;
+   cout << "\t_DEBUG_SET_FINDLINE_\tset not empty,"  << endl;
 #endif
 
    for (it = head; it != 0; it = it->get_next())
    {
+      /*
 #ifdef _DEBUG_SET_FINDLINE_
       cout << "\t_DEBUG_SET_FINDLINE_\tit = " << it << " tag = " << it->get_tag() << " valid = " << it->get_valid() << endl;
 #endif
+      */
       if (it->get_tag() == t && it->get_valid() == true)
       {
 #ifdef _DEBUG_SET_FINDLINE_
@@ -265,10 +280,12 @@ void set::output_blocks()
    cout << "assoc = " << associativity << ". size = " << size << " ";
 #endif
    cacheLine * it;
+   unsigned i = 0;
 
-   for (it = head; it != 0; it = it->get_next())
+   for (it = head; it != 0 && i < size; it = it->get_next())
    {
       cout << setw(8) << hex << it->get_tag() << " ";
+      size++;
    }
 }
 

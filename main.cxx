@@ -15,6 +15,7 @@ using namespace std;
 #include <fstream>
 #include <string>
 #include <iomanip>
+#include <ctime>
 
 // PROJECT INCLUDES
 #include "cxxcache.h"
@@ -30,12 +31,15 @@ unsigned long long cc = 0; // cycle count
 unsigned long long ic = 0; // instruction count
 unsigned branch, compute, load, store = 0;   // keep track of types of instructions
 
+time_t start, end;
+
 // EXTERNAL FUNCTIONS
 extern void get_config (string filename);
 extern void printParameters();
 
 // LOCAL FUNCTIONS
 unsigned fetch(cache * thisCache, unsigned addr, op_type op);
+void output();
 
 int main(int argc, char * argv[])
 {
@@ -113,13 +117,13 @@ int main(int argc, char * argv[])
 
 
    // BEGIN ACCEPTING TRACE CODE HERE
+   time(&start);
+
    cout << endl << "=============";
    cout << "Begin Trace";
    cout << "==============" << endl;
    while (!cin.eof())
    {
-      cout << endl;
-
       ic++; // increment instruction count
 
       // GET AN INSTRUCTION
@@ -127,10 +131,12 @@ int main(int argc, char * argv[])
       cout << "========== FETCHING INSTRUCTION ==========" << endl;
 #endif
       cin >> op >> hex >> addr >> hex >> exec;
-      cout << "inst #:\t" << setw(8) << dec << ic << "\top: " << op << "\taddr: " << setw(8) << hex << addr << "\texec: " << setw(8) << hex << exec << endl;
+      if (ic % 100000 == 0)
+      cout << "\rinst #:\t" << setw(8) << dec << ic << "\tcycles:\t" << setw(8) << dec << cc << "\top: " << op << "\taddr: " << setw(8) << hex << addr << "\texec: " << setw(8) << hex << exec;// << endl;
 
       cc += fetch(&I, addr, READ);
 
+      // ?????????????????????????????????????????????????
       cc++; // one cycle to process the instruction itself
       switch (op)
       {
@@ -163,43 +169,16 @@ int main(int argc, char * argv[])
 	    store++;
 	    break;
 	 default:
-	    cout << "ERROR: INVALID INSTRUCTION TYPE" << endl;
+	    cout << "ERROR: INVALID INSTRUCTION TYPE: " << op << endl;
 	    exit(ES_INVALID_INSTRUCTION);
 	    break;
       }
    }
 
-#ifdef _OUTPUT_CACHE_I_
-   cout << endl << "CACHE \"I\" FINAL STATE" << endl;
-   for (i = 0; i < I.get_numSets(); i++)
-   {
-      cout << endl;
-      cout << dec << "Set#: " << setw(4) << i << " | ";
-      I.get_set(i)->output_blocks();
-   }
-   cout << endl;
-#endif
-#ifdef _OUTPUT_CACHE_D_
-   cout << endl << "CACHE \"D\" FINAL STATE" << endl;
-   for (i = 0; i < D.get_numSets(); i++)
-   {
-      cout << endl;
-      cout << dec << "Set#: " << setw(4) << i << " | ";
-      D.get_set(i)->output_blocks();
-   }
-   cout << endl;
-#endif
-#ifdef _OUTPUT_CACHE_L2_
-   cout << endl << "CACHE \"L2\" FINAL STATE" << endl;
-   for (i = 0; i < L2.get_numSets(); i++)
-   {
-      cout << endl;
-      cout << dec << "Set#: " << setw(4) << i << " | ";
-      L2.get_set(i)->output_blocks();
-   }
-   cout << endl;
-#endif
+   time(&end);
+   output();
 
+   cout << endl;
    return 0;
 }
 
@@ -220,6 +199,7 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
 
    if(ptr)
    {  // L1 hit
+      thisCache->hits++;
       fetchTime += thisCache->get_tHit();
 #ifdef _DEBUG_FETCH_
       cout << "_DEBUG_FETCH_\taddress " << addr << " was found in L1" << endl;
@@ -232,6 +212,7 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
 	    cout << "_DEBUG_FETCH_\treading " << addr << " from L1" << endl;
 #endif
 	    thisCache->read(index, tag);
+	    
 	    break;
 	 case WRITE:
 #ifdef _DEBUG_FETCH_
@@ -358,3 +339,83 @@ unsigned fetch(cache * thisCache, unsigned addr, op_type operation)
    return fetchTime;
 }
 
+void output()
+{
+#ifdef _OUTPUT_
+   cout << endl << "=============== END TRACE =============" << endl << endl;
+#ifdef _OUTPUT_FILE_
+   ofstream outfile ("output.txt");
+#else
+#define outfile cout
+#endif
+#ifdef _OUTPUT_TRACE_STATS_
+   outfile << endl << "TRACE STATISTICS" << endl;
+
+   double timeDif = difftime(end, start);
+   unsigned hours, minutes, seconds = 0;
+   hours = timeDif / 3600;
+   minutes = ((int)timeDif - 3600*hours) / 60;
+   seconds = ((int)timeDif - 3600*hours - 60*minutes) / 60;
+   outfile << "actual completion time:\t" << dec << hours <<" : " << dec << minutes << " : " << dec << seconds << endl;
+
+   outfile << "total instructions:\t" << dec << ic << endl;
+   outfile << "total cycles:\t\t" << dec << cc << endl;
+   outfile << "average CPI:\t\t" << dec << (double)cc/ic << endl;
+   outfile << "load instructions\t" << dec << load << "\t[ " << (double)load/ic * 100 << " % ]" << endl;
+   outfile << "store instructions\t" << dec << store << "\t[ " << (double)store/ic * 100 << " % ]" << endl;
+   outfile << "branch instructions\t" << dec << branch << "\t[ " << (double)branch/ic * 100 << " % ]" << endl;
+   outfile << "compute instructions\t" << dec << compute << "\t[ " << (double)compute/ic * 100 << " % ]" << endl;
+#endif
+#ifdef _OUTPUT_CACHE_STATS_
+   outfile << endl << "CACHE STATISTICS\tL1-I\tL1-D\tL2" << endl;
+   outfile << "total reads\t=\t" << dec << I.get_reads() << "\t" << D.get_reads() << "\t" << L2.get_reads()<< endl;
+   outfile << "total writes\t=\t" << dec << I.get_writes() << "\t" << D.get_writes() << "\t" << L2.get_writes() << endl;
+   outfile << endl;
+   outfile << "total misses\t=\t" << dec << I.get_misses() << "\t" << D.get_misses() << "\t" << L2.get_misses() << endl;
+   outfile << "total hits\t=\t" << dec << I.get_hits() << "\t" << D.get_hits() << "\t" << L2.get_hits() << endl;
+   outfile << endl;
+   outfile << "read hits\t=\t" << dec << I.get_readHits() << "\t" << D.get_readHits() << "\t" << L2.get_readHits() << endl;
+   outfile << "write hits\t=\t" << dec << I.get_writeHits() << "\t" << D.get_writeHits() << "\t" << L2.get_writeHits() << endl;
+   outfile << endl;
+   outfile << "read misses\t=\t" << dec << I.get_readMisses() << "\t" << D.get_readMisses() << "\t" << L2.get_readMisses() << endl;
+   outfile << "write misses\t=\t" << dec << I.get_writeMisses() << "\t" << D.get_writeMisses() << "\t" << L2.get_writeMisses() << endl;
+   outfile << endl;
+   outfile << "read requests\t=\t" << dec << I.get_readRequests() << "\t" << D.get_readRequests() << "\t" << L2.get_readRequests() << endl;
+   outfile << "write requests\t=\t" << dec << I.get_writeRequests() << "\t" << D.get_writeRequests() << "\t" << L2.get_writeRequests() << endl;
+   outfile << endl;
+#endif
+#ifdef _OUTPUT_CACHE_I_
+   outfile << endl << "CACHE \"I\" FINAL STATE" << endl;
+   for (i = 0; i < I.get_numSets(); i++)
+   {
+      outfile << endl;
+      outfile << dec << "Set#: " << setw(4) << i << " | ";
+      I.get_set(i)->output_blocks();
+   }
+   outfile << endl;
+#endif
+#ifdef _OUTPUT_CACHE_D_
+   outfile << endl << "CACHE \"D\" FINAL STATE" << endl;
+   for (i = 0; i < D.get_numSets(); i++)
+   {
+      outfile << endl;
+      outfile << dec << "Set#: " << setw(4) << i << " | ";
+      D.get_set(i)->output_blocks();
+   }
+   outfile << endl;
+#endif
+#ifdef _OUTPUT_CACHE_L2_
+   outfile << endl << "CACHE \"L2\" FINAL STATE" << endl;
+   for (i = 0; i < L2.get_numSets(); i++)
+   {
+      outfile << endl;
+      outfile << dec << "Set#: " << setw(4) << i << " | ";
+      L2.get_set(i)->output_blocks();
+   }
+   outfile << endl;
+#endif
+#ifdef _OUTPUT_FILE_
+   outfile.close();
+#endif
+#endif
+}

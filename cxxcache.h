@@ -43,13 +43,28 @@ class cache
       unsigned get_tagBits() const { return tagBits; }
       set * get_set(unsigned i) const { return &sets[i]; }
 
+      // statistics
+      unsigned get_writes() {return writes;}
+      unsigned get_writeRequests() {return writeRequests;}
+      unsigned get_writeMisses() {return writeMisses;}
+      unsigned get_writeHits() {return writeHits;}
+
+      unsigned get_reads() {return reads;}
+      unsigned get_readRequests() {return readRequests;}
+      unsigned get_readMisses() {return readMisses;}
+      unsigned get_readHits() {return readHits;}
+
+      unsigned get_requests() {return requests;}
+      unsigned get_misses() {return misses;}
+      unsigned get_hits() {return hits;}
+
       // MEMBER FUNCTIONS
       cacheLine * hit(unsigned index, unsigned tag);
       cacheLine * write(unsigned index, unsigned tag);
       cacheLine * read(unsigned index, unsigned tag);
 
-      unsigned make_tag(unsigned addr) { return (addr >> (tagBits + byteBits)); }
-      unsigned make_index(unsigned addr) { return ( (addr << tagBits) >> (tagBits + byteBits) ); }
+      unsigned make_tag(unsigned addr);
+      unsigned make_index(unsigned addr); 
  
       void set_blockSize(unsigned newSize);
       void set_cacheSize(unsigned newSize);
@@ -61,6 +76,23 @@ class cache
       void set_numSets(unsigned n);
       void set_bytesPerBlock(unsigned n);
 
+      // statistics
+      unsigned writes;
+      unsigned writeRequests;
+      unsigned writeMisses;
+      unsigned writeHits;
+
+      unsigned reads;
+      unsigned readRequests;
+      unsigned readMisses;
+      unsigned readHits;
+
+      unsigned requests;
+      unsigned misses;
+      unsigned hits;
+
+      unsigned evictions;
+      unsigned dirtyEvictions;
 
    private:
       set * sets; 
@@ -81,20 +113,7 @@ class cache
       unsigned byteBits;
       unsigned tagBits;
 
-      // statistics
-      unsigned writes;
-      unsigned writeRequests;
-      unsigned writeMisses;
-      unsigned writeHits;
 
-      unsigned reads;
-      unsigned readRequests;
-      unsigned readMisses;
-      unsigned readHits;
-
-      unsigned requests;
-      unsigned misses;
-      unsigned hits;
 };
 
 class main_memory
